@@ -11,17 +11,23 @@ import 'package:get/get.dart';
 class LocationScreenController extends GetxController  {
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
   FlutterLocalNotificationsPlugin();
-  static StreamSubscription<Position>? positionStream;
-  static var locationData = <String>[].obs;
-  static Timer? locationUpdateTimer;
+   StreamSubscription<Position>? positionStream;
+   var locationData = <String>[].obs;
+   Timer? locationUpdateTimer;
 
   @override
   void onInit() {
     super.onInit();
     loadSavedLocations();
   }
+  @override
+  void onClose() {
+    positionStream?.cancel();
+    locationUpdateTimer?.cancel();
+    super.onClose();
+  }
   /// Initialize Notifications
-  static Future<void> initNotifications() async {
+   Future<void> initNotifications() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
     AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -32,7 +38,7 @@ class LocationScreenController extends GetxController  {
   }
 
   /// Show Notification
-  static Future<void> showNotification(String message) async {
+   Future<void> showNotification(String message) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
     AndroidNotificationDetails(
       'location_channel_id',
@@ -53,7 +59,7 @@ class LocationScreenController extends GetxController  {
   }
 
   /// Request Location Permission
-  static Future<void> requestLocationPermission(BuildContext context) async {
+   Future<void> requestLocationPermission(BuildContext context) async {
     var status = await Permission.location.request();
     if (status.isGranted) {
       customToast(Strings.locationGrant);
@@ -63,7 +69,7 @@ class LocationScreenController extends GetxController  {
   }
 
   /// Request Notification Permission
-  static Future<void> requestNotificationPermission(BuildContext context) async {
+   Future<void> requestNotificationPermission(BuildContext context) async {
   PermissionStatus status = await Permission.notification.request();
     if (status.isGranted) {
       customToast(Strings.notifyGrant);
@@ -75,7 +81,7 @@ class LocationScreenController extends GetxController  {
   }
 
   /// Start Location Updates
-   static void startLocationUpdates(BuildContext context) {
+    void startLocationUpdates(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog.adaptive(
@@ -98,7 +104,7 @@ class LocationScreenController extends GetxController  {
     );
   }
 
-  static void _confirmStartLocationUpdates() {
+   void _confirmStartLocationUpdates() {
     showNotification(Strings.locationUpdate);
 
     const LocationSettings locationSettings = LocationSettings(
@@ -106,27 +112,24 @@ class LocationScreenController extends GetxController  {
       distanceFilter: 5,
     );
 
-    // Cancel previous streams if any
-    positionStream?.cancel();
 
-    // Start real-time location stream
+    positionStream?.cancel();
+    locationUpdateTimer?.cancel();
+
     positionStream = Geolocator.getPositionStream(locationSettings: locationSettings)
         .listen((Position position) async {
       await _saveLocation(position);
     });
 
-    // Schedule periodic updates every 30 seconds
-    locationUpdateTimer?.cancel();
-    locationUpdateTimer = Timer.periodic(const Duration(seconds: 30), (timer) async {
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+    locationUpdateTimer = Timer.periodic(const Duration(seconds: 10), (timer) async {
+      Position position = await Geolocator.getCurrentPosition(locationSettings: LocationSettings(accuracy: LocationAccuracy.high) );
       await _saveLocation(position);
     });
 
     customToast(Strings.alertsStartMessage);
   }
 
-  static Future<void> _saveLocation(Position position) async {
+   Future<void> _saveLocation(Position position) async {
     String location = "Lat: ${position.latitude}, Lng: ${position.longitude}, Speed: ${position.speed} m/s";
     locationData.insert(0, location);
 
@@ -135,7 +138,7 @@ class LocationScreenController extends GetxController  {
   }
 
   /// Stop Location Updates
-  static void stopLocationUpdates(BuildContext context) {
+   void stopLocationUpdates(BuildContext context) {
     positionStream?.cancel();
     locationUpdateTimer?.cancel();
     showNotification(Strings.alertStopMessage);

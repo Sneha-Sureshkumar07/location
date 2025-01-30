@@ -12,12 +12,12 @@ class LocationScreen extends StatefulWidget {
 }
 
 class _LocationScreenState extends State<LocationScreen> {
-  List<String> locationData = [];
+  final LocationScreenController locationController = Get.put(LocationScreenController());
 
   @override
   void initState() {
     super.initState();
-    LocationScreenController.initNotifications();
+    locationController.initNotifications();
   }
 
 
@@ -52,11 +52,13 @@ class _LocationScreenState extends State<LocationScreen> {
              Expanded(
                 child: Container(
                   color: Colors.white,
-                  child: ListView.builder(
-                    itemCount: locationData.length,
-                    itemBuilder: (context, index) {
-                      return _buildRequestItem(locationData[index],screenSize,index+1);
-                    },
+                  child: Obx(
+                    () =>  ListView.builder(
+                      itemCount: locationController.locationData.length,
+                      itemBuilder: (context, index) {
+                        return _buildRequestItem(locationController.locationData[index],screenSize,index+1);
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -70,10 +72,10 @@ class _LocationScreenState extends State<LocationScreen> {
   Widget _buildButtonsColumn(Size screenSize) {
     return Column(
       children: [
-        _buildButton(Colors.blue, "Request Location Permission", () => LocationScreenController.requestLocationPermission(context),screenSize,Colors.white),
-        _buildButton(Colors.amber, "Request Notification Permission", () => LocationScreenController.requestNotificationPermission(context),screenSize,Colors.black),
-        _buildButton(Colors.green, "Start Location Update", () => LocationScreenController.startLocationUpdates(context),screenSize,Colors.white),
-        _buildButton(Colors.red, "Stop Location Update", () => LocationScreenController.stopLocationUpdates(context),screenSize,Colors.white),
+        _buildButton(Colors.blue, "Request Location Permission", () => locationController.requestLocationPermission(context),screenSize,Colors.white),
+        _buildButton(Colors.amber, "Request Notification Permission", () => locationController.requestNotificationPermission(context),screenSize,Colors.black),
+        _buildButton(Colors.green, "Start Location Update", () => locationController.startLocationUpdates(context),screenSize,Colors.white),
+        _buildButton(Colors.red, "Stop Location Update", () => locationController.stopLocationUpdates(context),screenSize,Colors.white),
       ],
     );
   }
@@ -83,10 +85,10 @@ class _LocationScreenState extends State<LocationScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildButton(Colors.blue,Strings.requestLocations, () => LocationScreenController.requestLocationPermission(context),screenSize,Colors.white),
-        _buildButton(Colors.amber, Strings.notification, () => LocationScreenController.requestNotificationPermission(context),screenSize,Colors.black),
-        _buildButton(Colors.green, Strings.startUpdate, () => LocationScreenController.startLocationUpdates(context),screenSize,Colors.white),
-        _buildButton(Colors.red, Strings.stopUpdate, () => LocationScreenController.stopLocationUpdates(context),screenSize,Colors.white),
+        _buildButton(Colors.blue,Strings.requestLocations, () => locationController.requestLocationPermission(context),screenSize,Colors.white),
+        _buildButton(Colors.amber, Strings.notification, () => locationController.requestNotificationPermission(context),screenSize,Colors.black),
+        _buildButton(Colors.green, Strings.startUpdate, () => locationController.startLocationUpdates(context),screenSize,Colors.white),
+        _buildButton(Colors.red, Strings.stopUpdate, () => locationController.stopLocationUpdates(context),screenSize,Colors.white),
       ],
     );
   }
@@ -129,7 +131,7 @@ class _LocationScreenState extends State<LocationScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Request$index", style: TextStyle(fontWeight: FontWeight.bold)),
+            Text("Request $index", style: TextStyle(fontWeight: FontWeight.bold)),
             Text(
               location,
               style: TextStyle(
