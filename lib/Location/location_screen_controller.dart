@@ -121,7 +121,7 @@ class LocationScreenController extends GetxController  {
       await _saveLocation(position);
     });
 
-    locationUpdateTimer = Timer.periodic(const Duration(seconds: 10), (timer) async {
+    locationUpdateTimer = Timer.periodic(const Duration(seconds: 30), (timer) async {
       Position position = await Geolocator.getCurrentPosition(locationSettings: LocationSettings(accuracy: LocationAccuracy.high) );
       await _saveLocation(position);
     });
